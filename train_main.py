@@ -19,11 +19,11 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=4e-4, help="learning rate")
     parser.add_argument("--beta1", type=float, default=0.5, help="Adam beta1")
     parser.add_argument("--beta2", type=float, default=0.999, help="Adam beta2")
-    parser.add_argument("--epochs", type=int, default=20, help="epochs")
+    parser.add_argument("--epochs", type=int, default=2000, help="epochs")
     parser.add_argument("--dropout", type=float, default=0.5, help="Dropout probability in UNET_CBAM decoder")
 
     # Training mode
-    parser.add_argument("--mode",type=str,default="PINN",help="Training mode: ML / SGML / PINN / FNO",)
+    parser.add_argument("--mode",type=str,default="SGML",help="Training mode: ML / SGML / PINN / FNO",)
 
     # Model saving
     parser.add_argument("--save_interval",type=int,default=10,help="Epoch interval for evaluation and model saving on validation set",)
@@ -177,3 +177,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
