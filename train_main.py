@@ -19,15 +19,15 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=4e-4, help="learning rate")
     parser.add_argument("--beta1", type=float, default=0.5, help="Adam beta1")
     parser.add_argument("--beta2", type=float, default=0.999, help="Adam beta2")
-    parser.add_argument("--epochs", type=int, default=2000, help="epochs")
+    parser.add_argument("--epochs", type=int, default=20, help="epochs")
     parser.add_argument("--dropout", type=float, default=0.5, help="Dropout probability in UNET_CBAM decoder")
 
     # Training mode
-    parser.add_argument("--mode",type=str,default="FNO",help="Training mode: ML / SGML / PINN / FNO",)
+    parser.add_argument("--mode",type=str,default="PINN",help="Training mode: ML / SGML / PINN / FNO",)
 
     # Model saving
     parser.add_argument("--save_interval",type=int,default=10,help="Epoch interval for evaluation and model saving on validation set",)
-    parser.add_argument("--top_k",type=int,default=2,help="Number of best models to keep based on validation error",)
+    parser.add_argument("--top_k",type=int,default=5,help="Number of best models to keep based on validation error",)
 
     # Data and saving paths
     parser.add_argument("--data_root",type=str,default="./DATA",help="Data root directory containing TRAIN / VAL subdirectories",)
@@ -120,13 +120,12 @@ def main():
             ERROR = []
             U_norm = args.u_norm
             with torch.no_grad():
-                for X, _ in val_loader:
+                for X, in val_loader:
                     X = X.to(torch.float).to(device)
 
                     approx = X[:, :, :, 0:256]
                     mask = X[:, :, :, 256:512]
                     target = X[:, :, :, 512:768]
-                    print(torch.max(target))
   
                     if mode == "SGML":
                         x = approx

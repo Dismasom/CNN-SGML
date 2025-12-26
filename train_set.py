@@ -1,8 +1,4 @@
 import os
-# Workaround for Windows: avoid crash when multiple OpenMP runtimes are loaded
-# (e.g., numpy/torch/other libs pulling in different libiomp5md.dll copies).
-os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-
 import numpy as np
 import torch.nn.functional as F
 import torch
@@ -31,13 +27,13 @@ def shrink_mask(mask, kernel_size=3,kernel_size2=7):
 class ModeLoss(nn.Module):
     def __init__(self, lambda_data=10, lambda_phy=0.01, lambda_bnd=1.0, lambda_ext=10.0):
         super().__init__()
-        # 最大权重（预热终值），可通过构造函数调整
+        # 最大权重（预热终值）
         self.lambda_phy_max = lambda_phy
         self.lambda_bnd_max = lambda_bnd
         self.lambda_ext_max = lambda_ext
         self.lambda_data = lambda_data
 
-        # 当前 epoch 实际使用的权重（运行时更新）
+        # 当前 epoch 实际使用的权重
         self.lambda_phy = 0.0
         self.lambda_bnd = 0.0
         self.lambda_ext = 0.0
@@ -56,13 +52,13 @@ class ModeLoss(nn.Module):
         - ML / SGML 模式: 仅使用 SmoothL1 数据损失
         - PINN 模式: 数据损失 + 边界损失 + 外部区域损失 + 物理方程损失
         """
-        U_ref = 1.6384 # 参考速度
+        U_ref = 1.6384 # 参考速度(用于无量纲)
         U_norm = 0.03451   # 归一化速度(训练集最大值)
         u_nd = phy_pred * mask * U_norm / U_ref  # 归一化速度场
         smooth_l1 = nn.SmoothL1Loss()
 
         data_loss = smooth_l1(pred, target)
-        # 纯数据驱动模式: 只返回数据损失
+        # 只返回数据损失
         if mode in ["ML", "SGML"]:
             return data_loss, {"data_loss": data_loss.item()}
 
