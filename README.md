@@ -2,13 +2,13 @@
 
 Code for the paper: **"Solution-Guided Machine Learning for Physical Field Prediction in Complex Geometries"**.
 
-## Setup
-```bash
-python -m venv .venv
-# Windows
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-```
+### Requirements
+- Python: 3.10
+- PyTorch: 2.5.1
+- CUDA: 11.8
+- numpy: 1.26.4
+- opencv-contrib-python：4.10.0.84
+- matplotlib: 3.8.3
 
 ## Usage
 ### Train
@@ -16,17 +16,6 @@ pip install -r requirements.txt
 python train_main.py 
 ```
 
-### Evaluate
-```bash
-python eval.py --ckpt path/to/checkpoint
-```
-
 ## Data
 Place it in: `Data/`
 
-
-}
-```
-
-## License
-MIT (or see `LICENSE`).
