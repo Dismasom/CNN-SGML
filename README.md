@@ -1,6 +1,6 @@
-# Project Title
+# CNN-SGML
 
-Code for the paper: **"Paper Title"**.
+Code for the paper: **"Solution-Guided Machine Learning for Physical Field Prediction in Complex Geometries"**.
 
 ## Setup
 ```bash
@@ -13,7 +13,7 @@ pip install -r requirements.txt
 ## Usage
 ### Train
 ```bash
-python train.py --config configs/default.yaml
+python train_main.py 
 ```
 
 ### Evaluate
@@ -22,16 +22,9 @@ python eval.py --ckpt path/to/checkpoint
 ```
 
 ## Data
-Download: <link>  
-Place it in: `data/`
+Place it in: `Data/`
 
-## Citation
-```bibtex
-@article{key,
-  title={Paper Title},
-  author={Author Names},
-  journal={Venue},
-  year={Year}
+
 }
 ```
 
