@@ -15,6 +15,9 @@ Code for the paper: **"Solution-Guided Machine Learning for Physical Field Predi
 ```bash
 python train_main.py 
 ```
+### Training modes
+You can set the training mode via the `--mode` argument: `ML`, `SGML`, `PINN`, or `FNO`.  
+The network architectures for these methods are implemented in `networks.py`.
 
 ### Dataset format (Data.rar)
 `Data.rar` contains the dataset for the pipe internal flow problem, including `train.npy`, `val.npy`, and `test.npy`.
