@@ -16,6 +16,13 @@ Code for the paper: **"Solution-Guided Machine Learning for Physical Field Predi
 python train_main.py 
 ```
 
-## Data
-Place it in: `Data/`
+### Dataset format (Data.rar)
+`Data.rar` contains the dataset for the pipe internal flow problem, including `train.npy`, `val.npy`, and `test.npy`.
+
+Each `.npy` file has shape **[N, 256, 768]** (N = number of samples).  
+For each sample, the **width dimension (768)** is split into three **256×256** blocks:
+
+- **[0:256]**: `approximate`
+- **[256:512]**: `mask`
+- **[512:768]**: `target`
 
