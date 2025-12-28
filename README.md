@@ -34,3 +34,14 @@ Extract the archive and place the files under `./DATA/` (e.g., `./DATA/train.npy
 ### Approximate solution construction
 The approximate solution is constructed in `test.py` via `Approximation_solution()`.  
 It takes the **MASK image**, **pressure drop**, and **viscosity** as inputs, computes the boundary and distance field using **OpenCV**, and outputs the corresponding approximate flow field.
+
+### Test
+You can directly run `test.py` to perform testing/inference:
+
+```bash
+python test.py
+```
+
+Pretrained reference checkpoints are provided in the `Model/` folder:
+- `Model/SGML.pth`
+- `Model/ML.pth`
