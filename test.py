@@ -70,7 +70,7 @@ def main():
 
         # Load model (only load once)
 
-        model=torch.load(r'D:\PINN_PIPE\SGML\checkpoints_sgml\UNET_CBAM_15\ngf_32\epoch_1000,32,b_8_2\generator_990.pth', weights_only=False)
+        model=torch.load(args.model)
         model.to(device).eval()
 
         print(f"data: {data_path}  shape={arr.shape}")
@@ -87,9 +87,6 @@ def main():
                         approx = X[:, :, :, 0:256]
                         mask = X[:, :, :, 256:512]
                         target = X[:, :, :, 512:768]
-                        mask=np.array(mask.to("cpu")).squeeze()
-                        inp=Approximation_solution(mask)
-                        mask=torch.from_numpy(mask[None, None, :, :]).to(device)
                         inp = approx if mode == "SGML" else mask
 
                         with torch.no_grad():
