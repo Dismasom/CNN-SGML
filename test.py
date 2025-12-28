@@ -87,10 +87,15 @@ def main():
                         approx = X[:, :, :, 0:256]
                         mask = X[:, :, :, 256:512]
                         target = X[:, :, :, 512:768]
-                        inp = approx if mode == "SGML" else mask
 
-                        with torch.no_grad():
-                                pred = model(inp/u_norm)
+                        if mode == "SGML" :
+                            inp = approx
+                            with torch.no_grad():
+                                pred = model(inp / u_norm)
+                        else:
+                            inp= mask
+                            with torch.no_grad():
+                                pred = model(inp)
 
                 pred_np = pred[0, 0].detach().cpu().numpy()  # (256,256)
                 pred_np = pred_np*u_norm
