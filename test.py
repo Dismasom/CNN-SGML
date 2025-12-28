@@ -24,15 +24,15 @@ def Approximation_solution(input,pade=2.5,vos=1e-3):
     cont, _ = cv2.findContours(input, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
     cont_num=_.shape[1]
     dis_img = np.zeros(input.shape)
-    if cont_num<=1: # 单联通域
+    if cont_num<=1: # Single connected domain
         cont = max(cont, key=cv2.contourArea)
         for y in range(dis_img.shape[0]):
             for x in range(dis_img.shape[1]):
-                # 使用pointPolygonTest检查每个点是否在轮廓内
+                # Use pointPolygonTest to check if each point is inside the contour
                 point = (x, y)
                 if cv2.pointPolygonTest(cont, point, False) >= 0:
                     dis_img[y, x] = cv2.pointPolygonTest(cont, point, True)
-    else: # 多联通域
+    else: # Multiple connected domains
         external_contours = cont[0]
         internal_contours = cont[1]
         for x in range(input.shape[1]):
@@ -49,28 +49,28 @@ def Approximation_solution(input,pade=2.5,vos=1e-3):
 
 def main():
         parser = argparse.ArgumentParser(description="Run inference on merged TEST npy (N,H,W).")
-        parser.add_argument("--data", default="TEST\\TEST_ALL.npy", help="Merged test .npy file, shape (N,256,768)")
-        parser.add_argument("--model", default="checkpoints/generator.pth", help="Model .pth path (torch.save'd model)")
+        parser.add_argument("--data", default="./Data/test.npy", help="Merged test .npy file, shape (N,256,768)")
+        parser.add_argument("--model", default="./Model/SGML.pth", help="Model .pth path (torch.save'd model)")
         parser.add_argument("--out",default="TEST",help="Output directory ",)
         parser.add_argument("--mode",type=str,default="SGML",help="SGML uses approx as input; ML/PINN uses mask as input",)
         parser.add_argument("--u_norm",type=float,default=0.03451,help="Scale factor applied to prediction when saving output",)
         parser.add_argument("--test_set", default=True )
         args = parser.parse_args()
-        #model=torch.load(r'D:\poisson2.0\SGML\checkpoints2\UNET_CBAM\UNET_CBAM_10\ngf_64\epoch_2000,64,b_8\generator_1950.pth')
-        data_path = Path(r"D:\Opensource\DATA\TEST\TEST_ALL.npy")
+        
+        data_path = Path(args.data)
         out_dir = Path(args.out)
         out_dir.mkdir(parents=True, exist_ok=True)
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         mode = str(args.mode).upper()
 
-        # 读取合并后的测试集（mmap 不占用整块内存）
+        # Read merged test set (mmap does not occupy entire memory block)
         arr = np.load(data_path, mmap_mode="r")
         n, h, w = arr.shape
 
-        # 加载模型（只加载一次）
+        # Load model (only load once)
 
-        model=torch.load(r'D:\PINN_PIPE\SGML\checkpoints_sgml\UNET_CBAM_15\ngf_32\epoch_1000,32,b_8_2\generator_990.pth')
+        model=torch.load(r'D:\PINN_PIPE\SGML\checkpoints_sgml\UNET_CBAM_15\ngf_32\epoch_1000,32,b_8_2\generator_990.pth', weights_only=False)
         model.to(device).eval()
 
         print(f"data: {data_path}  shape={arr.shape}")
@@ -103,10 +103,9 @@ def main():
                 save_data = np.concatenate((inp_np, pred_np, tgt_np), axis=1)
                 np.save(out_dir / f"{i}.npy", save_data)
 
-                # 可视化：保存拼接图和预测图
+                # Visualization: Save concatenated and predicted images
                 vmax_all = float(np.max(save_data[:, 512:]))
                 _save_png(save_data, out_dir / f"output_all_{i}.png", vmax=vmax_all)
-                _save_png(pred_np, out_dir / f"output_{i}.png")
 
                 if (i + 1) % 50 == 0 or i == n - 1:
                         print(f"[{i+1}/{n}] done")

@@ -48,12 +48,12 @@ class CBAM(nn.Module):
 class UNET_CBAM(nn.Module):
     def __init__(self, in_ch, out_ch, base_channels=None, num_layers=8, width_multipliers=None, dropout=0.2):
         """
-        可配置U-Net with CBAM
-        :param in_ch: 输入通道数
-        :param out_ch: 输出通道数
-        :param base_channels: 基础通道数
-        :param num_layers: 网络总层数
-        :param width_multipliers: 各层通道数倍增系数列表
+        Configurable U-Net with CBAM
+        :param in_ch: Input channels
+        :param out_ch: Output channels
+        :param base_channels: Base channels
+        :param num_layers: Total number of network layers
+        :param width_multipliers: List of width multipliers for each layer
         """
         super().__init__()
         self.num_layers = num_layers
@@ -62,12 +62,12 @@ class UNET_CBAM(nn.Module):
         self.decoder_convs = nn.ModuleList()
         self.cbam_modules = nn.ModuleList()
 
-        # 初始化宽度系数
+        # Initialize width coefficients
         if width_multipliers is None:
-            width_multipliers = [min(2 ** (i), 8) for i in range(num_layers)]  # 限制最大8倍
+            width_multipliers = [min(2 ** (i), 8) for i in range(num_layers)]  # Limit maximum to 8x
         self.width_multipliers = width_multipliers
 
-        # 构建编码器
+        # Build encoder
         prev_ch = in_ch
         for i in range(num_layers):
             out_ch_en = base_channels * width_multipliers[i]
@@ -80,20 +80,20 @@ class UNET_CBAM(nn.Module):
             self.cbam_modules.append(CBAM(out_ch_en))
             prev_ch = out_ch_en
 
-        # 中间层
+        # Middle layer
         self.mid_conv = nn.Sequential(
                 nn.Conv2d(prev_ch, prev_ch, kernel_size=4, stride=2, padding=1),
                 nn.LeakyReLU(0.2, True) ,
                 nn.BatchNorm2d(prev_ch)
             )
 
-        # 构建解码器
+        # Build decoder
         for i in reversed(range(num_layers)):
             if i==num_layers-1:
                 in_ch_de=base_channels * width_multipliers[i]
                 out_ch_de=in_ch_de
             else:
-                in_ch_de = base_channels * width_multipliers[i+1] * 2  # 包含skip connection
+                in_ch_de = base_channels * width_multipliers[i+1] * 2  # Includes skip connection
                 out_ch_de = base_channels * (width_multipliers[i] if i > 0 else 1)
             decoder = nn.Sequential(
                 nn.Upsample(scale_factor=2, mode='bilinear'),
@@ -104,7 +104,7 @@ class UNET_CBAM(nn.Module):
             )
             self.decoder_convs.append(decoder)
 
-        # 最终输出层
+        # Final output layer
         self.final_conv = nn.Sequential(
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(base_channels * 2, out_ch, kernel_size=3, stride=1, padding=1),
@@ -126,8 +126,8 @@ class UNET_CBAM(nn.Module):
         # Decoder
         for i, conv in enumerate(self.decoder_convs):
             x = conv(x)
-            # 跳跃连接拼接
-            x = torch.cat([x, skip_connections[-(i + 1)]], dim=1)  # -2开始取对应层
+            # Skip connection concatenation
+            x = torch.cat([x, skip_connections[-(i + 1)]], dim=1)  # Start taking corresponding layer from -2
 
         # Final output
         x = self.final_conv(x)
@@ -136,17 +136,17 @@ class UNET_CBAM(nn.Module):
     
 
 class SpectralConv2d(nn.Module):
-    """2D Fourier layer: 在频域中对前若干模式做线性变换"""
+    """2D Fourier layer: Linear transformation of the first few modes in frequency domain"""
 
     def __init__(self, in_channels, out_channels, modes1, modes2):
         super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.modes1 = modes1  # 高度方向保留的频率数
-        self.modes2 = modes2  # 宽度方向保留的频率数
+        self.modes1 = modes1  # Number of frequencies preserved in height direction
+        self.modes2 = modes2  # Number of frequencies preserved in width direction
 
         scale = 1.0 / (in_channels * out_channels)
-        # 复权重，作用在低频子块上
+        # Complex weights, applied to low-frequency sub-blocks
         self.weight = nn.Parameter(
             scale * torch.randn(in_channels, out_channels, modes1, modes2, dtype=torch.cfloat)
         )
@@ -157,7 +157,7 @@ class SpectralConv2d(nn.Module):
 
     def forward(self, x):
         batchsize, _, height, width = x.shape
-        # rfft2 只在宽度方向输出一半频率（实数优化）
+        # rfft2 outputs only half the frequencies in width direction (real number optimization)
         x_ft = torch.fft.rfft2(x)
 
         out_ft = torch.zeros(
@@ -179,10 +179,10 @@ class SpectralConv2d(nn.Module):
         return x
        
 class FNO2D(nn.Module):
-    """2D FNO 结构：输入为 256x256 mask（或多通道场），输出对应流场
+    """2D FNO structure: Input is 256x256 mask (or multi-channel field), output is corresponding flow field
 
-    输入尺寸: [B, in_ch, 256, 256]
-    输出尺寸: [B, out_ch, 256, 256]
+    Input size: [B, in_ch, 256, 256]
+    Output size: [B, out_ch, 256, 256]
     """
 
     def __init__(
@@ -200,10 +200,10 @@ class FNO2D(nn.Module):
         self.depth = depth
         self.use_tanh = use_tanh
 
-        # 线性升维: in_ch → width
+        # Linear dimension increase: in_ch → width
         self.fc0 = nn.Conv2d(in_ch, width, kernel_size=1)
 
-        # 若干个 FNO Block
+        # Several FNO Blocks
         self.spectral_layers = nn.ModuleList()
         self.pointwise_layers = nn.ModuleList()
         for _ in range(depth):
@@ -211,7 +211,7 @@ class FNO2D(nn.Module):
             self.spectral_layers.append(SpectralConv2d(width, width, modes1, modes2))
             self.pointwise_layers.append(nn.Conv2d(width, width, kernel_size=1))
 
-        # 线性降维到目标通道
+        # Linear dimension reduction to target channels
         self.fc1 = nn.Conv2d(width, width, kernel_size=1)
         self.fc2 = nn.Conv2d(width, out_ch*8, kernel_size=1)
         self.fc3 = nn.Conv2d(out_ch*8, out_ch*8, kernel_size=3, padding=1)

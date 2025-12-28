@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument("--batch_size", type=int, default=8, help="batch size")
     parser.add_argument("--in_ch", type=int, default=1, help="input channels")
     parser.add_argument("--out_ch", type=int, default=1, help="output channels")
-    parser.add_argument("--num_layers", type=int, default=5, help="UNet layers")
+    parser.add_argument("--num_layers", type=int, default=7, help="UNet layers")
     parser.add_argument("--lr", type=float, default=4e-4, help="learning rate")
     parser.add_argument("--beta1", type=float, default=0.5, help="Adam beta1")
     parser.add_argument("--beta2", type=float, default=0.999, help="Adam beta2")
@@ -177,4 +177,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
