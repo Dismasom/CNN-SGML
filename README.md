@@ -27,3 +27,7 @@ For each sample, the **width dimension (768)** is split into three **256×256** 
 - **[512:768]**: `target`
 
 Extract the archive and place the files under `./DATA/` (e.g., `./DATA/train.npy`, `./DATA/val.npy`, `./DATA/test.npy`).
+
+### Approximate solution construction
+The approximate solution is constructed in `test.py` via `Approximation_solution()`.  
+It takes the **MASK image**, **pressure drop**, and **viscosity** as inputs, computes the boundary and distance field using **OpenCV**, and outputs the corresponding approximate flow field.
