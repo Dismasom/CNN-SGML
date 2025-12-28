@@ -26,3 +26,4 @@ For each sample, the **width dimension (768)** is split into three **256×256** 
 - **[256:512]**: `mask`
 - **[512:768]**: `target`
 
+Extract the archive and place the files under `./DATA/` (e.g., `./DATA/train.npy`, `./DATA/val.npy`, `./DATA/test.npy`).
